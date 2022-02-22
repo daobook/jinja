@@ -183,7 +183,7 @@ class TestMeta:
         i = meta.find_referenced_templates(ast)
         assert next(i) == "layout.html"
         assert next(i) is None
-        assert list(i) == []
+        assert not list(i)
 
         ast = env.parse(
             '{% extends "layout.html" %}'
@@ -424,7 +424,7 @@ class TestLowLevel:
     def test_custom_context(self):
         class CustomContext(Context):
             def resolve_or_missing(self, key):
-                return "resolve-" + key
+                return f'resolve-{key}'
 
         class CustomEnvironment(Environment):
             context_class = CustomContext

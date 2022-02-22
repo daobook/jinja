@@ -46,10 +46,7 @@ V = t.TypeVar("V")
 def ignore_case(value: V) -> V:
     """For use as a postprocessor for :func:`make_attrgetter`. Converts strings
     to lowercase and returns other types as-is."""
-    if isinstance(value, str):
-        return t.cast(V, value.lower())
-
-    return value
+    return t.cast(V, value.lower()) if isinstance(value, str) else value
 
 
 def make_attrgetter(
@@ -162,11 +159,7 @@ def do_urlencode(
     if isinstance(value, str) or not isinstance(value, abc.Iterable):
         return url_quote(value)
 
-    if isinstance(value, dict):
-        items: t.Iterable[t.Tuple[str, t.Any]] = value.items()
-    else:
-        items = value  # type: ignore
-
+    items = value.items() if isinstance(value, dict) else value
     return "&".join(
         f"{url_quote(k, for_qs=True)}={url_quote(v, for_qs=True)}" for k, v in items
     )
@@ -251,7 +244,7 @@ def do_xmlattr(
     )
 
     if autospace and rv:
-        rv = " " + rv
+        rv = f' {rv}'
 
     if eval_ctx.autoescape:
         rv = Markup(rv)
@@ -552,11 +545,7 @@ def sync_do_join(
             else:
                 value[idx] = str(item)
 
-        if do_escape:
-            d = escape(d)
-        else:
-            d = str(d)
-
+        d = escape(d) if do_escape else str(d)
         return d.join(value)
 
     # no html involved, to normal joining
@@ -769,11 +758,7 @@ def do_indent(
 
         Rename the ``indentfirst`` argument to ``first``.
     """
-    if isinstance(width, str):
-        indention = width
-    else:
-        indention = " " * width
-
+    indention = width if isinstance(width, str) else " " * width
     newline = "\n"
 
     if isinstance(s, Markup):
@@ -921,10 +906,7 @@ def do_int(value: t.Any, default: int = 0, base: int = 10) -> int:
     The base is ignored for decimal numbers and non-string values.
     """
     try:
-        if isinstance(value, str):
-            return int(value, base)
-
-        return int(value)
+        return int(value, base) if isinstance(value, str) else int(value)
     except (TypeError, ValueError):
         # this quirk is necessary so that "42.23"|int gives 42.
         try:
@@ -1009,8 +991,7 @@ def sync_do_slice(
     """
     seq = list(value)
     length = len(seq)
-    items_per_slice = length // slices
-    slices_with_extra = length % slices
+    items_per_slice, slices_with_extra = divmod(length, slices)
     offset = 0
 
     for slice_number in range(slices):

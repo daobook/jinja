@@ -32,11 +32,7 @@ class Symbols:
         self, parent: t.Optional["Symbols"] = None, level: t.Optional[int] = None
     ) -> None:
         if level is None:
-            if parent is None:
-                level = 0
-            else:
-                level = parent.level + 1
-
+            level = 0 if parent is None else parent.level + 1
         self.level: int = level
         self.parent = parent
         self.refs: t.Dict[str, str] = {}
@@ -162,7 +158,7 @@ class Symbols:
         node: t.Optional["Symbols"] = self
 
         while node is not None:
-            for target, (instr, _) in self.loads.items():
+            for target, (instr, _) in node.loads.items():
                 if instr == VAR_LOAD_PARAMETER:
                     rv.add(target)
 
