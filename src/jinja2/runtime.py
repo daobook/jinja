@@ -100,10 +100,7 @@ def new_context(
     """Internal helper for context creation."""
     if vars is None:
         vars = {}
-    if shared:
-        parent = vars
-    else:
-        parent = dict(globals or (), **vars)
+    parent = vars if shared else dict(globals or (), **vars)
     if locals:
         # if the parent is shared a copy should be created because
         # we don't want to modify the dict passed
@@ -853,7 +850,7 @@ class Undefined:
 
     @internalcode
     def __getattr__(self, name: str) -> t.Any:
-        if name[:2] == "__":
+        if name.startswith("__"):
             raise AttributeError(name)
 
         return self._fail_with_undefined_error()
